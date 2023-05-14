@@ -8,11 +8,11 @@
 
 #define LED PB0
 #define ANALOG_INPUT PC0
-#define STEP PB2
-#define DIR PB1
-#define MS1 PD6
-#define MS2 PD5
-#define MS3 PB7
+#define STEP PB1
+#define DIR PB2
+#define MS3 PD5
+#define MS2 PD6
+#define MS1 PD7
 #define SLEEP PB6
 
 /* 
@@ -26,7 +26,6 @@
         Enable output compare match A
     TIFR0
         Clear flags
-
 */
 void setupTimer() {
     TCCR0A = (1 << WGM01);
@@ -99,12 +98,12 @@ int main(void){
     usartInit();
     initAdcTemp();
 
-    Pin pinStep = {&PIND, &PORTD, &DDRD, STEP};
+    Pin pinStep = {&PINB, &PORTB, &DDRB, STEP};
     Pin pinDir = {&PINB, &PORTB, &DDRB, DIR};
     pinSleep = (Pin) {&PINB, &PORTB, &DDRB, SLEEP};
     pinMS1 = (Pin) {&PIND, &PORTD, &DDRD, MS1};
     pinMS2 = (Pin) {&PIND, &PORTD, &DDRD, MS2};
-    pinMS3 = (Pin) {&PINB, &PORTB, &DDRB, MS3};
+    pinMS3 = (Pin) {&PIND, &PORTD, &DDRD, MS3};
     initPin(pinStep, OUTPUT);
     initPin(pinDir, OUTPUT);
     initPin(pinSleep, OUTPUT);
@@ -114,6 +113,10 @@ int main(void){
 
     stepperMotor = (StepperMotor) {&pinStep, &pinDir, 12, CLOCKWISE};
     writePin(pinSleep, HIGH);
+    writePin(pinMS1, LOW);
+    writePin(pinMS2, LOW);
+    writePin(pinMS3, LOW);
+    writePin(pinDir, HIGH);
 
     stepperMotorSetSpeed(&stepperMotor, 10);
     setupTimer();
@@ -130,18 +133,21 @@ int main(void){
         for(uint8_t i = 0; i < pot; i++){
             _delay_ms(1);
         }
-
         printNumberWithLeadingZeroes(sampleNumber++, 4);
         usartPrint(": ");
         printNumberWithLeadingZeroes(pot, 3);
         usartPrint("\n\r");
-
     }
 
     return 0;
 }
 
 ISR(TIMER0_COMPA_vect) {
+    // writePin(*stepperMotor.dir, HIGH);
+
+    // writePin(*stepperMotor.step, HIGH);
+    // writePin(*stepperMotor.step, LOW);
+
     stepperMotorRunMotor(&stepperMotor);
     stepperMotor.toMove = 1;
     

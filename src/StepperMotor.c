@@ -25,7 +25,6 @@ void stepperMotorSetMicrostepping(Pin* m1, Pin* m2, uint8_t micro) {
 }
 
 void stepperMotorRunMotor(StepperMotor* motor) {
-
     if (motor->toMove == 0) {
 
         if (motor->moving) {
