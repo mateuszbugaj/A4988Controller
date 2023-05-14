@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "ARV",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/lib/avr/include/**",
+                "/usr/lib/avr/include/avr/**",
+                "/usr/lib/avr/include/avr/"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "__ATmega168__",
+                "__AVR_ATmega168__",
+                "__ATtiny85__",
+                "__AVR_ATtiny85__",
+                "BAUD",
+                "REFS2"
+            ],
+            "compilerPath": "/usr/bin/avr-gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64",
+            "compilerArgs": [
+                "-mmcu=attiny85"
+            ]
+        }
+    ],
+    "version": 4
+}
