@@ -1,0 +1,30 @@
+#ifndef _USART_H_
+#define _USART_H_
+
+#ifndef BAUD
+#define BAUD 9600
+#endif
+
+#include <avr/interrupt.h>
+#include <avr/io.h>
+#include <util/delay.h>
+#include <util/setbaud.h>
+#include <stdbool.h>
+
+#define USART_BUFFER_SIZE 20
+#define ASCII_BACKSPACE 127
+
+char usart_last_command[USART_BUFFER_SIZE];
+uint8_t usart_last_command_length;
+
+void usart_init(void);
+void usart_print(char content[]);
+// void usart_print(char content[], uint8_t size);
+void usart_print_num(int16_t number);
+void usart_print_float(float number, int precision);
+bool usart_compare_str(char* s1, char* s2, uint8_t s1_size, uint8_t s2_size);
+int16_t* usart_get_numbers(char str[], uint8_t str_size, float* buffer);
+bool usart_contains_str(char* s1, char* s2, uint8_t s1_size, uint8_t s2_size);
+bool usart_command_processed();
+
+#endif /* _USART_H_ */

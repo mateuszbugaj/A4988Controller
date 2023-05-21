@@ -14,31 +14,39 @@ A4988 driver = {
     .dir = { .port = &PORTB, .pin = PB2 }
 };
 
+void handle_speed_command(uint16_t speed) {
+    a4988_set_speed(&driver, speed);
+}
+
+
 int main(void) {
     clock_prescale_set(clock_div_1);
 
     // Initialize A4988 driver
     a4988_init(&driver);
+    a4988_set_speed(&driver, 120);
 
+    // Initialize USART
+    usart_init();
+    parser_init(handle_speed_command);
+
+    int timestamp = 0;
+    GPIOPin pinLED = { .port = &PORTB, .pin = PB0 };
+    gpio_pin_direction(pinLED, OUTPUT);
+    usart_print("Start.");
     while (1) {
-        // Drive the motor forward
-        a4988_set_direction(&driver, 1);
-        for (uint16_t i = 0; i < NUM_STEPS; i++) {
-            a4988_step(&driver);
-            _delay_ms(1);
-        }
+        gpio_pin_write(pinLED, HIGH);
+        _delay_ms(500);
 
-        _delay_ms(DELAY_MS);
+        gpio_pin_write(pinLED, LOW);
+        _delay_ms(500);
 
-        // Drive the motor in reverse
-        a4988_set_direction(&driver, 0);
-        for (uint16_t i = 0; i < NUM_STEPS; i++) {
-            a4988_step(&driver);
-            _delay_ms(1);
-        }
-
-        _delay_ms(DELAY_MS);
     }
 
     return 0;
+}
+
+ISR(TIMER1_COMPA_vect) {
+    // This ISR will be called each time Timer1 matches the value in OCR1A
+    a4988_step(&driver);
 }
