@@ -28,6 +28,9 @@ void usart_print(char content[]) {
     }
 }
 
+void usart_print_char(char c){
+    transmit_byte(c);
+}
 
 void usart_print_num(int16_t number){
     char buffer[6]; // enough to hold all digits of int16_t

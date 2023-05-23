@@ -19,9 +19,9 @@ uint8_t usart_last_command_length;
 
 void usart_init(void);
 void usart_print(char content[]);
-// void usart_print(char content[], uint8_t size);
 void usart_print_num(int16_t number);
 void usart_print_float(float number, int precision);
+void usart_print_char(char c);
 bool usart_compare_str(char* s1, char* s2, uint8_t s1_size, uint8_t s2_size);
 int16_t* usart_get_numbers(char str[], uint8_t str_size, float* buffer);
 bool usart_contains_str(char* s1, char* s2, uint8_t s1_size, uint8_t s2_size);

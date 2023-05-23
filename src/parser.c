@@ -1,5 +1,8 @@
 #include "../inc/parser.h"
-#include <stdlib.h> // For atoi()
+#include "../inc/usart.h"
+#include <stdlib.h>
+
+#define NUM_BUFFER_SIZE 6  // Enough to store a 16-bit number plus null terminator
 
 typedef enum {
     STATE_WAITING_FOR_COMMAND,
@@ -7,39 +10,48 @@ typedef enum {
 } ParserState;
 
 static ParserState state;
-static char number_buffer[6]; // Enough to store a 16-bit number plus null terminator
-static int number_buffer_pos;
-static CommandCallback speedCommandCallback;
+static char num_buffer[NUM_BUFFER_SIZE];
+static int num_buffer_pos;
+static parser_command_handler_t* command_handlers;
+static uint8_t num_handlers;
+static char lastCommand;
 
-void parser_init(CommandCallback _speedCommandCallback) {
-    speedCommandCallback = _speedCommandCallback;
+void parser_init(parser_command_handler_t* handlers, uint8_t handlers_count) {
+    command_handlers = handlers;
+    num_handlers = handlers_count;
     state = STATE_WAITING_FOR_COMMAND;
-    number_buffer_pos = 0;
+    num_buffer_pos = 0;
 }
 
 void parser_feed_char(char c) {
     switch (state) {
         case STATE_WAITING_FOR_COMMAND:
-            if (c == 'F') {
-                // We're starting a speed command. Switch to parsing the number.
-                state = STATE_PARSING_NUMBER;
-                number_buffer_pos = 0;
+            lastCommand = '\0';
+            for (uint8_t i = 0; i < num_handlers; i++) {
+                if (command_handlers[i].command == c) {
+                    state = STATE_PARSING_NUMBER;
+                    num_buffer_pos = 0;
+                    lastCommand = c;
+                    break;
+                }
             }
             break;
-
         case STATE_PARSING_NUMBER:
             if (c >= '0' && c <= '9') {
                 // It's a digit. Add it to the buffer.
-                if (number_buffer_pos < sizeof(number_buffer) - 1) {
-                    number_buffer[number_buffer_pos++] = c;
-                } else {
-                    // The number is too long. Ignore this digit.
+                if (num_buffer_pos < NUM_BUFFER_SIZE - 1) {
+                    num_buffer[num_buffer_pos++] = c;
                 }
             } else if (c == '\n' || c == '\r') {
                 // End of the command. Convert the number and call the callback.
-                number_buffer[number_buffer_pos] = '\0'; // Null-terminate the string
-                uint16_t number = atoi(number_buffer);
-                speedCommandCallback(number);
+                num_buffer[num_buffer_pos] = '\0'; // Null-terminate the string
+                uint16_t number = atoi(num_buffer);
+                for (uint8_t i = 0; i < num_handlers; i++) {
+                    if (command_handlers[i].command == lastCommand) {
+                        command_handlers[i].callback(number);
+                        break;
+                    }
+                }
                 state = STATE_WAITING_FOR_COMMAND;
             }
             break;
