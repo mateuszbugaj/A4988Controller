@@ -31,7 +31,7 @@ void a4988_init(A4988* driver) {
     gpio_pin_direction(driver->ms1, OUTPUT);
     gpio_pin_direction(driver->ms2, OUTPUT);
     gpio_pin_direction(driver->ms3, OUTPUT);
-    gpio_pin_write(driver->sleep, LOW);
+    gpio_pin_write(driver->sleep, HIGH);
     gpio_pin_write(driver->ms1, LOW);
     gpio_pin_write(driver->ms2, LOW);
     gpio_pin_write(driver->ms3, LOW);
@@ -44,8 +44,16 @@ void a4988_init(A4988* driver) {
     timer1_init();
 }
 
-void a4988_set_resolution(A4988* driver, uint8_t microstep) {
+void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
+    if(microstep == driver->microstep) return;
+
+    float microstepFloat = microstep;
+    float microstepScaleFactor = (float)(microstepFloat / driver->microstep);
+
     driver->microstep = microstep;
+    driver->target_steps *= microstepScaleFactor;
+    driver->current_steps *= microstepScaleFactor;
+    driver->current_tick = 0;
 
     switch (microstep) {
         case 1:  // Full step
@@ -63,12 +71,14 @@ void a4988_set_resolution(A4988* driver, uint8_t microstep) {
             break;
 
         case 4:  // Quarter step
+            usart_print("Quater step\n\r");
             gpio_pin_write(driver->ms1, LOW);
             gpio_pin_write(driver->ms2, HIGH);
             gpio_pin_write(driver->ms3, LOW);
             break;
 
         case 8:  // Eighth step
+            usart_print("Eighth step\n\r");
             gpio_pin_write(driver->ms1, HIGH);
             gpio_pin_write(driver->ms2, HIGH);
             gpio_pin_write(driver->ms3, LOW);
@@ -105,7 +115,6 @@ void a4988_step(A4988* driver) {
         driver->current_steps += driver->direction == FORWARD ? 1 : -1;
         if (driver->current_steps == driver->target_steps) {
             driver->moving = false;
-            gpio_pin_write(driver->sleep, LOW);
         }
     }
 }
@@ -136,7 +145,7 @@ void a4988_set_angle(A4988* driver, float angle) {
 
     driver->direction = driver->current_steps < desired_steps ? FORWARD : BACKWARD;
     driver->moving = true;
-    gpio_pin_write(driver->sleep, HIGH);
+
     driver->target_steps = desired_steps;
 }
 

@@ -29,8 +29,8 @@ void handle_set_angle_command(uint16_t angle) {
     a4988_set_angle(&motor1, angle);
 }
 
-void handle_set_microstep_command(uint16_t resolution) {
-    a4988_set_resolution(&motor1, resolution);
+void handle_set_microstep_command(uint16_t microstep) {
+    a4988_set_microstepping(&motor1, microstep);
 }
 
 
@@ -55,24 +55,24 @@ int main(void) {
     gpio_pin_direction(pinLED, OUTPUT);
     usart_print("Start\n\r");
 
-    a4988_set_speed(&motor1, 500);
-    a4988_set_angle(&motor1, 45);
-    a4988_set_resolution(&motor1, 4);
+    a4988_set_speed(&motor1, 2);
+    // a4988_set_angle(&motor1, 45);
+    a4988_set_microstepping(&motor1, 1);
     while (1) {
         if(a4988_is_moving(&motor1)){
             gpio_pin_write(pinLED, HIGH);
         } else {
             gpio_pin_write(pinLED, LOW);
 
-            _delay_ms(1000);
+            // _delay_ms(1000);
             
-            if(x){
-                a4988_set_angle(&motor1, 180);
-                x = false;
-            } else {
-                a4988_set_angle(&motor1, 0);
-                x = true;
-            }
+            // if(x){
+            //     a4988_set_angle(&motor1, 180);
+            //     x = false;
+            // } else {
+            //     a4988_set_angle(&motor1, 0);
+            //     x = true;
+            // }
         }
     }
 
