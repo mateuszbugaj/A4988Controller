@@ -36,10 +36,13 @@ void a4988_init(A4988* driver) {
     gpio_pin_write(driver->ms2, LOW);
     gpio_pin_write(driver->ms3, LOW);
     driver->step_ticks = 0;
+    driver->speed_increase_total = 0;
     driver->microstep = 1;
 
     // Set default speed
-    a4988_set_speed(driver, 20); // Default to 20 steps per second
+    // a4988_set_speed(driver, 20); // Default to 20 steps per second
+    a4988_set_acceleration(driver, 1);
+    a4988_set_target_speed(driver, 20);
 
     timer1_init();
 }
@@ -95,7 +98,27 @@ void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
 
 void a4988_step(A4988* driver) {
     if (driver->moving) {
-        if(driver->current_tick != driver->step_ticks / driver->microstep){
+        int32_t remaining_steps = abs(driver->target_steps - driver->current_steps);
+
+        // Accelerate if not reached the target speed or decalaretion point
+        if(driver->current_speed < driver->target_speed && remaining_steps > driver->deceleration_point){
+            driver->speed_increase_total += driver->acceleration_per_tick;
+        } else if(remaining_steps < driver->deceleration_point && driver->current_speed > 5){
+            driver->speed_increase_total -= driver->acceleration_per_tick;
+        }
+
+        int8_t speed_increase = (int8_t)driver->speed_increase_total;
+        driver->current_speed += speed_increase;
+        driver->speed_increase_total -= (float)speed_increase;
+
+        // Update step_ticks according to the new speed
+        if(driver->current_speed != 0){
+            driver->step_ticks = TICKS_PER_SECOND / driver->current_speed;
+        } else {
+            return;
+        }
+
+        if(driver->current_tick < driver->step_ticks / driver->microstep){
             driver->current_tick++;
             return;
         } else {
@@ -115,7 +138,20 @@ void a4988_step(A4988* driver) {
         driver->current_steps += driver->direction == FORWARD ? 1 : -1;
         if (driver->current_steps == driver->target_steps) {
             driver->moving = false;
+            driver->current_speed = 0;
         }
+    }
+}
+
+void a4988_set_target_speed(A4988* driver, uint16_t speed) {
+    usart_print("Set target speed : ");
+    usart_print_num(speed);
+    usart_print("\n\r");
+
+    if (speed > 0) {
+        driver->target_speed = speed;
+        driver->current_speed = 0;
+        driver->speed_increase_total = 0;
     }
 }
 
@@ -125,28 +161,47 @@ void a4988_set_speed(A4988* driver, uint16_t speed) {
     usart_print("\n\r");
 
     if (speed > 0) {
-        driver->speed = speed;
+        driver->current_speed = speed;
+        driver->speed_increase_total = 0;
         // Convert speed in steps per second to ticks per step
         driver->current_tick = 0;
         driver->step_ticks = TICKS_PER_SECOND / speed;
     }
 }
 
+void a4988_set_acceleration(A4988* driver, uint16_t acceleration){
+    usart_print("Set acceleration : ");
+    usart_print_num(acceleration);
+    usart_print("\n\r");
+
+    if(acceleration > 0){
+        driver->acceleration = acceleration;
+        driver->acceleration_per_tick = (float)((float)acceleration/TICKS_PER_SECOND);
+        driver->speed_increase_total = 0;
+    }
+}
+
 void a4988_set_angle(A4988* driver, float angle) {
-    usart_print("Set angle : ");
+    usart_print("Set angle: ");
     usart_print_num(angle);
     usart_print("\n\r");
 
-    // Calculate the number of steps for the desired angle
-    int32_t desired_steps = (int32_t)(angle / 360.0 * STEPS_PER_REVOLUTION * driver->microstep);
     
-    // Set the target steps and adjust the direction of movement
-    if(driver->current_steps == desired_steps) return;
+    int32_t target_steps = (int32_t)(angle / 360.0 * STEPS_PER_REVOLUTION * driver->microstep); // Number of steps for the desired angle
+    if(driver->current_steps == target_steps) return;
 
-    driver->direction = driver->current_steps < desired_steps ? FORWARD : BACKWARD;
+    int32_t distance_to_target_speed = ((driver->target_speed * driver->target_speed) / (2.0 * driver->acceleration)) * driver->microstep;
+    int32_t abs_steps_difference = abs(target_steps - driver->current_steps); // The absolute difference between the current and desired steps
+
+    if(distance_to_target_speed > abs_steps_difference/2){
+        driver->deceleration_point = abs_steps_difference/2;
+    } else {
+        driver->deceleration_point = distance_to_target_speed;
+    }
+
+    driver->target_steps = target_steps;
+    driver->direction = driver->current_steps < target_steps ? FORWARD : BACKWARD;
     driver->moving = true;
-
-    driver->target_steps = desired_steps;
 }
 
 float a4988_get_angle(A4988* driver) {

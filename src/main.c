@@ -25,6 +25,10 @@ void handle_set_speed_command(uint16_t speed) {
     a4988_set_speed(&motor1, speed);
 }
 
+void handle_set_acceleration_command(uint16_t acceleration) {
+    a4988_set_acceleration(&motor1, acceleration);
+}
+
 void handle_set_angle_command(uint16_t angle) {
     a4988_set_angle(&motor1, angle);
 }
@@ -37,7 +41,8 @@ void handle_set_microstep_command(uint16_t microstep) {
 parser_command_handler_t command_handlers[] = {
     { .command = 'S', .callback = handle_set_speed_command},
     { .command = 'A', .callback = handle_set_angle_command},
-    { .command = 'M', .callback = handle_set_microstep_command}
+    { .command = 'M', .callback = handle_set_microstep_command},
+    { .command = 'C', .callback = handle_set_acceleration_command}
 };
 
 bool x = true;
@@ -55,9 +60,9 @@ int main(void) {
     gpio_pin_direction(pinLED, OUTPUT);
     usart_print("Start\n\r");
 
-    a4988_set_speed(&motor1, 2);
-    // a4988_set_angle(&motor1, 45);
-    a4988_set_microstepping(&motor1, 1);
+    a4988_set_target_speed(&motor1, 100);
+    a4988_set_acceleration(&motor1, 40);
+    a4988_set_microstepping(&motor1, 4);
     while (1) {
         if(a4988_is_moving(&motor1)){
             gpio_pin_write(pinLED, HIGH);
