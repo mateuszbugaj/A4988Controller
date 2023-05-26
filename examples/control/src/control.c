@@ -2,14 +2,10 @@
 #include <util/delay.h>
 #include <avr/power.h>
 
-#include "../inc/gpio.h"
-#include "../inc/a4988.h"
-#include "../inc/parser.h"
+#include "gpio.h"
+#include "a4988.h"
+#include "parser.h"
 
-#define DELAY_MS 500
-#define NUM_STEPS 200
-
-// Define the A4988 motor1 pins globally
 A4988 motor1 = {
     .step = { .port = &PORTB, .pin = PB1 },
     .dir = { .port = &PORTB, .pin = PB2 },
@@ -45,8 +41,6 @@ parser_command_handler_t command_handlers[] = {
     { .command = 'C', .callback = handle_set_acceleration_command}
 };
 
-bool x = true;
-
 int main(void) {
     clock_prescale_set(clock_div_1);
 
@@ -68,16 +62,6 @@ int main(void) {
             gpio_pin_write(pinLED, HIGH);
         } else {
             gpio_pin_write(pinLED, LOW);
-
-            // _delay_ms(1000);
-            
-            // if(x){
-            //     a4988_set_angle(&motor1, 180);
-            //     x = false;
-            // } else {
-            //     a4988_set_angle(&motor1, 0);
-            //     x = true;
-            // }
         }
     }
 

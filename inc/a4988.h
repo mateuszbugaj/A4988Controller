@@ -5,7 +5,6 @@
 #include <avr/interrupt.h>
 #include <stdbool.h>
 #include "../inc/gpio.h"
-#include "../inc/usart.h"
 
 #define FORWARD 1
 #define BACKWARD 0

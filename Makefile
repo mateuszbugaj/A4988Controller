@@ -1,34 +1,19 @@
-MCU=atmega168
-F_CPU=8000000UL
-CC = avr-gcc
-OBJCOPY = avr-objcopy
-CFLAGS=-std=c99 -Wall -g -Os -mmcu=${MCU} -DF_CPU=${F_CPU} -I.
-TARGET=Main
-SRCDIR := src
-INCDIR := inc
-SOURCES := $(wildcard $(SRCDIR)/*.c)
-OBJECTS := $(patsubst $(SRCDIR)/%.c, $(SRCDIR)/%.o, $(SOURCES))
-DEPS := $(patsubst $(SRCDIR)/%.c, $(SRCDIR)/%.d, $(SOURCES))
+A4988_LIBRARY_DIR := ./
+A4988_LIBRARY_NAME := a4988
+A4988_LIBRARY_OBJ_DIR := $(A4988_LIBRARY_DIR)src/
+A4988_LIBRARY_INC_DIR := $(A4988_LIBRARY_DIR)inc/
+A4988_LIBRARY_SRC := $(wildcard $(A4988_LIBRARY_OBJ_DIR)*.c)
+A4988_LIBRARY_OBJ := $(A4988_LIBRARY_SRC:.c=.o)
+A4988_LIBRARY_AR := ar -rcs
 
-.PHONY: all flash clean
+# default rule to build .a library
+all: $(A4988_LIBRARY_NAME).a
 
-all: ${TARGET}.hex
+$(A4988_LIBRARY_NAME).a: $(A4988_LIBRARY_OBJ)
+    $(A4988_LIBRARY_AR) $@ $^
 
--include $(DEPS)
-
-$(SRCDIR)/%.o: $(SRCDIR)/%.c
-	${CC} -c -MMD ${CFLAGS} -I$(INCDIR) $< -o $@
-
-${TARGET}.bin: $(OBJECTS)
-	${CC} ${CFLAGS} -o $@ $^
-
-${TARGET}.hex: ${TARGET}.bin
-	${OBJCOPY} -j .text -j .data -O ihex $< $@
-
-flash: ${TARGET}.hex
-	avrdude -p ${MCU} -c usbasp -U flash:w:$<:i -F -P usb -B 4
+%.o: %.c
+    $(CC) $(CFLAGS) -I$(A4988_LIBRARY_INC_DIR) -c $< -o $@
 
 clean:
-	rm -f *.bin *.hex $(SRCDIR)/*.o $(SRCDIR)/*.d
-
-flash_and_clean: all flash clean
+    rm -f $(A4988_LIBRARY_NAME).a $(A4988_LIBRARY_OBJ)

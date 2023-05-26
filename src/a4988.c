@@ -60,28 +60,24 @@ void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
 
     switch (microstep) {
         case 1:  // Full step
-            usart_print("Full step\n\r");
             gpio_pin_write(driver->ms1, LOW);
             gpio_pin_write(driver->ms2, LOW);
             gpio_pin_write(driver->ms3, LOW);
             break;
 
         case 2:  // Half step
-            usart_print("Half step\n\r");
             gpio_pin_write(driver->ms1, HIGH);
             gpio_pin_write(driver->ms2, LOW);
             gpio_pin_write(driver->ms3, LOW);
             break;
 
         case 4:  // Quarter step
-            usart_print("Quater step\n\r");
             gpio_pin_write(driver->ms1, LOW);
             gpio_pin_write(driver->ms2, HIGH);
             gpio_pin_write(driver->ms3, LOW);
             break;
 
         case 8:  // Eighth step
-            usart_print("Eighth step\n\r");
             gpio_pin_write(driver->ms1, HIGH);
             gpio_pin_write(driver->ms2, HIGH);
             gpio_pin_write(driver->ms3, LOW);
@@ -144,10 +140,6 @@ void a4988_step(A4988* driver) {
 }
 
 void a4988_set_target_speed(A4988* driver, uint16_t speed) {
-    usart_print("Set target speed : ");
-    usart_print_num(speed);
-    usart_print("\n\r");
-
     if (speed > 0) {
         driver->target_speed = speed;
         driver->current_speed = 0;
@@ -156,10 +148,6 @@ void a4988_set_target_speed(A4988* driver, uint16_t speed) {
 }
 
 void a4988_set_speed(A4988* driver, uint16_t speed) {
-    usart_print("Set speed : ");
-    usart_print_num(speed);
-    usart_print("\n\r");
-
     if (speed > 0) {
         driver->current_speed = speed;
         driver->speed_increase_total = 0;
@@ -170,10 +158,6 @@ void a4988_set_speed(A4988* driver, uint16_t speed) {
 }
 
 void a4988_set_acceleration(A4988* driver, uint16_t acceleration){
-    usart_print("Set acceleration : ");
-    usart_print_num(acceleration);
-    usart_print("\n\r");
-
     if(acceleration > 0){
         driver->acceleration = acceleration;
         driver->acceleration_per_tick = (float)((float)acceleration/TICKS_PER_SECOND);
@@ -181,12 +165,7 @@ void a4988_set_acceleration(A4988* driver, uint16_t acceleration){
     }
 }
 
-void a4988_set_angle(A4988* driver, float angle) {
-    usart_print("Set angle: ");
-    usart_print_num(angle);
-    usart_print("\n\r");
-
-    
+void a4988_set_angle(A4988* driver, float angle) {    
     int32_t target_steps = (int32_t)(angle / 360.0 * STEPS_PER_REVOLUTION * driver->microstep); // Number of steps for the desired angle
     if(driver->current_steps == target_steps) return;
 
