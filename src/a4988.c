@@ -191,3 +191,27 @@ float a4988_get_angle(A4988* driver) {
 bool a4988_is_moving(A4988* driver) {
     return driver->moving;
 }
+
+void a4988_set_steps(A4988* driver, int64_t target_steps) {    
+    if(driver->current_steps == target_steps) return;
+
+    int64_t distance_to_target_speed = ((driver->target_speed * driver->target_speed) / (2.0 * driver->acceleration)) * driver->microstep;
+    int32_t abs_steps_difference = abs(target_steps - driver->current_steps); // The absolute difference between the current and desired steps
+
+    if(distance_to_target_speed > abs_steps_difference/2){
+        driver->deceleration_point = abs_steps_difference/2;
+    } else {
+        driver->deceleration_point = distance_to_target_speed;
+    }
+
+    driver->target_steps = target_steps;
+    driver->direction = driver->current_steps < target_steps ? FORWARD : BACKWARD;
+    driver->moving = true;
+}
+
+
+void a4988_move_steps(A4988* const device, float steps) {
+    int32_t steps_to_take = steps * device->microstep;
+    int32_t new_position = device->current_steps + steps_to_take;
+    a4988_set_steps(device, new_position);
+}

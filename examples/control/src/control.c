@@ -25,7 +25,7 @@ void handle_set_acceleration_command(uint16_t acceleration) {
     a4988_set_acceleration(&motor1, acceleration);
 }
 
-void handle_set_angle_command(uint16_t angle) {
+void handle_set_angle_command(int16_t angle) {
     a4988_set_angle(&motor1, angle);
 }
 
@@ -33,12 +33,17 @@ void handle_set_microstep_command(uint16_t microstep) {
     a4988_set_microstepping(&motor1, microstep);
 }
 
+void handle_move_by_command(int16_t steps) {
+    a4988_move_steps(&motor1, steps);
+}
+
 
 parser_command_handler_t command_handlers[] = {
     { .command = 'S', .callback = handle_set_speed_command},
     { .command = 'A', .callback = handle_set_angle_command},
     { .command = 'M', .callback = handle_set_microstep_command},
-    { .command = 'C', .callback = handle_set_acceleration_command}
+    { .command = 'C', .callback = handle_set_acceleration_command},
+    { .command = 'X', .callback = handle_move_by_command}
 };
 
 int main(void) {

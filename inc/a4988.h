@@ -40,5 +40,6 @@ void a4988_set_angle(A4988* driver, float angle); // Angle in degrees
 float a4988_get_angle(A4988* driver); // Returns the current angle of the motor in degrees
 bool a4988_is_moving(A4988* driver); // Returns true if the motor is moving
 void a4988_set_microstepping(A4988* driver, uint8_t microstep);
+void a4988_move_steps(A4988* const device, float steps); // Moves the motor by relative number of steps
 
 #endif // A4988_H
