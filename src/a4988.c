@@ -169,7 +169,7 @@ void a4988_set_angle(A4988* driver, float angle) {
     int32_t target_steps = (int32_t)(angle / 360.0 * STEPS_PER_REVOLUTION * driver->microstep); // Number of steps for the desired angle
     if(driver->current_steps == target_steps) return;
 
-    int32_t distance_to_target_speed = ((driver->target_speed * driver->target_speed) / (2.0 * driver->acceleration)) * driver->microstep;
+    int64_t distance_to_target_speed = ((driver->target_speed * driver->target_speed) / (2.0 * driver->acceleration)) * driver->microstep;
     int32_t abs_steps_difference = abs(target_steps - driver->current_steps); // The absolute difference between the current and desired steps
 
     if(distance_to_target_speed > abs_steps_difference/2){

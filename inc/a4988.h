@@ -17,16 +17,16 @@ typedef struct {
     GPIOPin ms2;
     GPIOPin ms3;
     uint8_t microstep;
-    int16_t step_ticks; // Ticks between each step for Timer
-    int16_t current_tick;
+    int32_t step_ticks; // Ticks between each step for Timer
+    int32_t current_tick;
     int32_t current_steps; // Current position of the motor in steps
     int32_t target_steps;
-    int16_t current_speed; // steps per second
-    int16_t target_speed;
-    int16_t acceleration; // steps per second squared
+    int32_t current_speed; // steps per second
+    int32_t target_speed;
+    int32_t acceleration; // steps per second squared
     float acceleration_per_tick; // acceleration divided by the number of ticks in a seccond
     float speed_increase_total; // Accumulated speed increase due to acceleration
-    int16_t deceleration_point; // Number of steps needed to decelerate
+    int32_t deceleration_point; // Number of steps needed to decelerate
     bool moving;
     int8_t direction;
 } A4988;

@@ -7,10 +7,10 @@
 #include "parser.h"
 
 A4988 motor1 = {
-    .step = { .port = &PORTB, .pin = PB1 },
+    .step = { .port = &PORTC, .pin = PC1 },
     .dir = { .port = &PORTB, .pin = PB2 },
     .sleep = { .port = &PORTB, .pin = PB6},
-    .ms1 = { .port = &PORTD, .pin = PB6},
+    .ms1 = { .port = &PORTD, .pin = PD6},
     .ms2 = { .port = &PORTD, .pin = PD5},
     .ms3 = { .port = &PORTB, .pin = PB7}
 };
