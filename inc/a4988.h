@@ -29,6 +29,7 @@ typedef struct {
     int32_t deceleration_point; // Number of steps needed to decelerate
     bool moving;
     int8_t direction;
+	bool constantSpeed;
 } A4988;
 
 void a4988_init(A4988* driver);

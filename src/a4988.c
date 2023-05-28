@@ -38,6 +38,7 @@ void a4988_init(A4988* driver) {
     driver->step_ticks = 0;
     driver->speed_increase_total = 0;
     driver->microstep = 1;
+	driver->constantSpeed = false;
 
     // Set default speed
     // a4988_set_speed(driver, 20); // Default to 20 steps per second
@@ -94,25 +95,27 @@ void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
 
 void a4988_step(A4988* driver) {
     if (driver->moving) {
-        int32_t remaining_steps = abs(driver->target_steps - driver->current_steps);
+		if(driver->constantSpeed == false){
+			int32_t remaining_steps = abs(driver->target_steps - driver->current_steps);
 
-        // Accelerate if not reached the target speed or decalaretion point
-        if(driver->current_speed < driver->target_speed && remaining_steps > driver->deceleration_point){
-            driver->speed_increase_total += driver->acceleration_per_tick;
-        } else if(remaining_steps < driver->deceleration_point && driver->current_speed > 5){
-            driver->speed_increase_total -= driver->acceleration_per_tick;
-        }
+			// Accelerate if not reached the target speed or decalaretion point
+			if(driver->current_speed < driver->target_speed && remaining_steps > driver->deceleration_point){
+				driver->speed_increase_total += driver->acceleration_per_tick;
+			} else if(remaining_steps < driver->deceleration_point && driver->current_speed > 5){
+				driver->speed_increase_total -= driver->acceleration_per_tick;
+			}
 
-        int8_t speed_increase = (int8_t)driver->speed_increase_total;
-        driver->current_speed += speed_increase;
-        driver->speed_increase_total -= (float)speed_increase;
+			int8_t speed_increase = (int8_t)driver->speed_increase_total;
+			driver->current_speed += speed_increase;
+			driver->speed_increase_total -= (float)speed_increase;
 
-        // Update step_ticks according to the new speed
-        if(driver->current_speed != 0){
-            driver->step_ticks = TICKS_PER_SECOND / driver->current_speed;
-        } else {
-            return;
-        }
+			// Update step_ticks according to the new speed
+			if(driver->current_speed != 0){
+				driver->step_ticks = TICKS_PER_SECOND / driver->current_speed;
+			} else {
+				return;
+			}
+		}
 
         if(driver->current_tick < driver->step_ticks / driver->microstep){
             driver->current_tick++;
@@ -140,29 +143,26 @@ void a4988_step(A4988* driver) {
 }
 
 void a4988_set_target_speed(A4988* driver, uint16_t speed) {
-    if (speed > 0) {
-        driver->target_speed = speed;
-        driver->current_speed = 0;
-        driver->speed_increase_total = 0;
-    }
+	driver->constantSpeed = false;
+	driver->target_speed = speed;
+	driver->current_speed = 0;
+	driver->speed_increase_total = 0;
 }
 
 void a4988_set_speed(A4988* driver, uint16_t speed) {
-    if (speed > 0) {
-        driver->current_speed = speed;
-        driver->speed_increase_total = 0;
-        // Convert speed in steps per second to ticks per step
-        driver->current_tick = 0;
-        driver->step_ticks = TICKS_PER_SECOND / speed;
-    }
+	driver->constantSpeed = true;
+	driver->current_speed = speed;
+	driver->speed_increase_total = 0;
+	// Convert speed in steps per second to ticks per step
+	driver->current_tick = 0;
+	driver->step_ticks = TICKS_PER_SECOND / speed;
 }
 
 void a4988_set_acceleration(A4988* driver, uint16_t acceleration){
-    if(acceleration > 0){
-        driver->acceleration = acceleration;
-        driver->acceleration_per_tick = (float)((float)acceleration/TICKS_PER_SECOND);
-        driver->speed_increase_total = 0;
-    }
+	driver->constantSpeed = false;
+	driver->acceleration = acceleration;
+	driver->acceleration_per_tick = (float)((float)acceleration/TICKS_PER_SECOND);
+	driver->speed_increase_total = 0;
 }
 
 void a4988_set_angle(A4988* driver, float angle) {    

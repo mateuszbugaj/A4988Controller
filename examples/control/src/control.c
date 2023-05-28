@@ -21,6 +21,10 @@ void handle_set_speed_command(uint16_t speed) {
     a4988_set_speed(&motor1, speed);
 }
 
+void handle_set_target_speed_command(uint16_t speed) {
+    a4988_set_target_speed(&motor1, speed);
+}
+
 void handle_set_acceleration_command(uint16_t acceleration) {
     a4988_set_acceleration(&motor1, acceleration);
 }
@@ -37,13 +41,25 @@ void handle_move_by_command(int16_t steps) {
     a4988_move_steps(&motor1, steps);
 }
 
+void handle_help_command(){
+	usart_print("Help\n\r");
+	usart_print("A - Set target angle (0-359)\n\r");
+	usart_print("S - Set constant speed in full steps (no acceleration and automatically adjusted for microstepping)\n\r");
+	usart_print("T - Set target speed (will use the acceleration)\n\r");
+	usart_print("M - Set microstepping ([1, 2, 4, 8] -> [1, 1/2, 1/4, 1/8])\n\r");
+	usart_print("C - Set acceleration in full steps per second squared\n\r");
+	usart_print("X - Move by of full steps\n\r");
+	usart_print("H - This message\n\r");
+}
 
 parser_command_handler_t command_handlers[] = {
     { .command = 'S', .callback = handle_set_speed_command},
     { .command = 'A', .callback = handle_set_angle_command},
     { .command = 'M', .callback = handle_set_microstep_command},
     { .command = 'C', .callback = handle_set_acceleration_command},
-    { .command = 'X', .callback = handle_move_by_command}
+    { .command = 'X', .callback = handle_move_by_command},
+    { .command = 'T', .callback = handle_set_target_speed_command},
+	{ .command = 'H', .callback = handle_help_command}
 };
 
 int main(void) {
@@ -58,6 +74,7 @@ int main(void) {
 
     gpio_pin_direction(pinLED, OUTPUT);
     usart_print("Start\n\r");
+	handle_help_command();
 
     a4988_set_target_speed(&motor1, 100);
     a4988_set_acceleration(&motor1, 40);
