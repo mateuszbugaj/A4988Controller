@@ -2,27 +2,25 @@
 #include "../inc/a4988.h"
 
 #define CLOCK_FREQUENCY 8000000
-#define PRESCALER 256
 #define STEPS_PER_REVOLUTION 200
 #define TICKS_PER_SECOND 1000
 
-void timer1_init(void) {
-    // Set up timer with prescaler = 64 and CTC mode
-    TCCR1B |= (1 << WGM12) | (1 << CS11) | (1 << CS10);
-    TIMSK1 |= (1 << OCIE1A);
-    TCCR1A = 0;
-    TCNT1 = 0;
+void timer0_init(void) {
+    // Set up timer with prescaler = 256 and CTC mode
+    TCCR0A |= (1 << WGM01);
+    TCCR0B |= (1 << CS02);
+    TIMSK0 |= (1 << OCIE0A);
+    TCNT0 = 0;
 
     /* 
         Initialize compare value
         (F_CPU / Prescaler / Desired Interrupt Frequency) - 1. 
     */
-    OCR1A = 124; 
+    OCR0A = 6; 
 
     // Enable global interrupts
     sei();
 }
-
 
 void a4988_init(A4988* driver) {
     gpio_pin_direction(driver->dir, OUTPUT);
@@ -45,7 +43,7 @@ void a4988_init(A4988* driver) {
     a4988_set_acceleration(driver, 1);
     a4988_set_target_speed(driver, 20);
 
-    timer1_init();
+    timer0_init();
 }
 
 void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
