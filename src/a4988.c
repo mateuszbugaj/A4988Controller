@@ -16,7 +16,7 @@ void timer0_init(void) {
         Initialize compare value
         (F_CPU / Prescaler / Desired Interrupt Frequency) - 1. 
     */
-    OCR0A = 6; 
+    OCR0A = 12; 
 
     // Enable global interrupts
     sei();
