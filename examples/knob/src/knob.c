@@ -6,7 +6,7 @@
 #include "../inc/a4988.h"
 
 A4988 motor1 = {
-    .step = { .port = &PORTC, .pin = PC1 },
+    .step = { .port = &PORTB, .pin = PB1 },
     .dir = { .port = &PORTB, .pin = PB2 },
     .sleep = { .port = &PORTB, .pin = PB6},
     .ms1 = { .port = &PORTD, .pin = PD6},
@@ -25,8 +25,7 @@ int main(void) {
     a4988_init(&motor1);
 
     gpio_pin_direction(pinLED, OUTPUT);
-    a4988_set_target_speed(&motor1, 100);
-    a4988_set_acceleration(&motor1, 100);
+    a4988_set_speed(&motor1, 100);
     a4988_set_microstepping(&motor1, 4);
     while (1) {
         if(a4988_is_moving(&motor1)){
@@ -49,6 +48,6 @@ int main(void) {
     return 0;
 }
 
-ISR(TIMER1_COMPA_vect) {
+ISR(TIMER0_COMPA_vect) {
     a4988_step(&motor1);
 }

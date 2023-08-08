@@ -90,6 +90,6 @@ int main(void) {
     return 0;
 }
 
-ISR(TIMER1_COMPA_vect) {
+ISR(TIMER0_COMPA_vect) {
     a4988_step(&motor1);
 }
