@@ -1,5 +1,5 @@
 #include <util/delay.h>
-#include "../inc/a4988.h"
+#include "a4988.h"
 
 #define CLOCK_FREQUENCY 8000000
 #define STEPS_PER_REVOLUTION 200
@@ -23,16 +23,16 @@ void timer0_init(void) {
 }
 
 void a4988_init(A4988* driver) {
-    gpio_pin_direction(driver->dir, OUTPUT);
-    gpio_pin_direction(driver->step, OUTPUT);
-    gpio_pin_direction(driver->sleep, OUTPUT);
-    gpio_pin_direction(driver->ms1, OUTPUT);
-    gpio_pin_direction(driver->ms2, OUTPUT);
-    gpio_pin_direction(driver->ms3, OUTPUT);
-    gpio_pin_write(driver->sleep, HIGH);
-    gpio_pin_write(driver->ms1, LOW);
-    gpio_pin_write(driver->ms2, LOW);
-    gpio_pin_write(driver->ms3, LOW);
+    hal_pin_direction(driver->dir, OUTPUT);
+    hal_pin_direction(driver->step, OUTPUT);
+    hal_pin_direction(driver->sleep, OUTPUT);
+    hal_pin_direction(driver->ms1, OUTPUT);
+    hal_pin_direction(driver->ms2, OUTPUT);
+    hal_pin_direction(driver->ms3, OUTPUT);
+    hal_pin_write(driver->sleep, HIGH);
+    hal_pin_write(driver->ms1, LOW);
+    hal_pin_write(driver->ms2, LOW);
+    hal_pin_write(driver->ms3, LOW);
     driver->step_ticks = 0;
     driver->speed_increase_total = 0;
     driver->microstep = 1;
@@ -59,34 +59,34 @@ void a4988_set_microstepping(A4988* driver, uint8_t microstep) {
 
     switch (microstep) {
         case 1:  // Full step
-            gpio_pin_write(driver->ms1, LOW);
-            gpio_pin_write(driver->ms2, LOW);
-            gpio_pin_write(driver->ms3, LOW);
+            hal_pin_write(driver->ms1, LOW);
+            hal_pin_write(driver->ms2, LOW);
+            hal_pin_write(driver->ms3, LOW);
             break;
 
         case 2:  // Half step
-            gpio_pin_write(driver->ms1, HIGH);
-            gpio_pin_write(driver->ms2, LOW);
-            gpio_pin_write(driver->ms3, LOW);
+            hal_pin_write(driver->ms1, HIGH);
+            hal_pin_write(driver->ms2, LOW);
+            hal_pin_write(driver->ms3, LOW);
             break;
 
         case 4:  // Quarter step
-            gpio_pin_write(driver->ms1, LOW);
-            gpio_pin_write(driver->ms2, HIGH);
-            gpio_pin_write(driver->ms3, LOW);
+            hal_pin_write(driver->ms1, LOW);
+            hal_pin_write(driver->ms2, HIGH);
+            hal_pin_write(driver->ms3, LOW);
             break;
 
         case 8:  // Eighth step
-            gpio_pin_write(driver->ms1, HIGH);
-            gpio_pin_write(driver->ms2, HIGH);
-            gpio_pin_write(driver->ms3, LOW);
+            hal_pin_write(driver->ms1, HIGH);
+            hal_pin_write(driver->ms2, HIGH);
+            hal_pin_write(driver->ms3, LOW);
             break;
 
         default:
             // Invalid resolution, default to full step
-            gpio_pin_write(driver->ms1, LOW);
-            gpio_pin_write(driver->ms2, LOW);
-            gpio_pin_write(driver->ms3, LOW);
+            hal_pin_write(driver->ms1, LOW);
+            hal_pin_write(driver->ms2, LOW);
+            hal_pin_write(driver->ms3, LOW);
             break;
     }
 }
@@ -123,14 +123,14 @@ void a4988_step(A4988* driver) {
         }
 
         if(driver->direction == FORWARD){
-            gpio_pin_write(driver->dir, HIGH);
+            hal_pin_write(driver->dir, HIGH);
         } else {
-            gpio_pin_write(driver->dir, LOW);
+            hal_pin_write(driver->dir, LOW);
         }
 
-        gpio_pin_write(driver->step, HIGH);
+        hal_pin_write(driver->step, HIGH);
         _delay_us(5); // Signal rise time
-        gpio_pin_write(driver->step, LOW);
+        hal_pin_write(driver->step, LOW);
 
         driver->current_steps += driver->direction == FORWARD ? 1 : -1;
         if (driver->current_steps == driver->target_steps) {

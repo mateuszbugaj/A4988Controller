@@ -1,0 +1,3 @@
+[submodule "lib/HALibrary"]
+	path = lib/HALibrary
+	url = git@github.com:mateuszbugaj/HALibrary.git

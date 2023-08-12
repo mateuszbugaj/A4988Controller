@@ -4,18 +4,18 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
-#include "../inc/gpio.h"
+#include "hal.h"
 
 #define FORWARD 1
 #define BACKWARD 0
 
 typedef struct {
-    GPIOPin step;
-    GPIOPin dir;
-    GPIOPin sleep;
-    GPIOPin ms1;
-    GPIOPin ms2;
-    GPIOPin ms3;
+    HALPin step;
+    HALPin dir;
+    HALPin sleep;
+    HALPin ms1;
+    HALPin ms2;
+    HALPin ms3;
     uint8_t microstep;
     int32_t step_ticks; // Ticks between each step for Timer
     int32_t current_tick;

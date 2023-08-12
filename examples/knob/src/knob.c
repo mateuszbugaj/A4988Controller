@@ -2,8 +2,25 @@
 #include <util/delay.h>
 #include <avr/power.h>
 
-#include "../inc/gpio.h"
-#include "../inc/a4988.h"
+#include "hal.h"
+#include "a4988.h"
+
+/*
+
++------+
+| A168 |               +-----------+    +--------+
+|      |               |   A4988   |    | NEMA17 |
+|  PB0 +-> LED -> GND  |           |    |        |
+|  PB1 +-------------->+ STEP   2B +--->+ 2B     |
+|  PB2 >-------------->+ DIR    2A +--->+ 2A     |
+|  PB6 >-------------->+ SLEEP  1A +--->+ 1A     |
+|  PD6 >-------------->+ MS1    1B +--->+ 1B     |
+|  PD5 >-------------->+ MS2       |    +--------+
+|  PB7 >-------------->+ MS3       |
+|      |               +-----------+
++------+            
+
+*/
 
 A4988 motor1 = {
     .step = { .port = &PORTB, .pin = PB1 },
@@ -14,7 +31,7 @@ A4988 motor1 = {
     .ms3 = { .port = &PORTB, .pin = PB7}
 };
 
-GPIOPin pinLED = { .port = &PORTB, .pin = PB0 };
+HALPin pinLED = { .port = &PORTB, .pin = PB0 };
 
 bool x = true;
 
@@ -24,14 +41,14 @@ int main(void) {
     // Initialize A4988 motor1
     a4988_init(&motor1);
 
-    gpio_pin_direction(pinLED, OUTPUT);
+    hal_pin_direction(pinLED, OUTPUT);
     a4988_set_speed(&motor1, 100);
     a4988_set_microstepping(&motor1, 4);
     while (1) {
         if(a4988_is_moving(&motor1)){
-            gpio_pin_write(pinLED, HIGH);
+            hal_pin_write(pinLED, HIGH);
         } else {
-            gpio_pin_write(pinLED, LOW);
+            hal_pin_write(pinLED, LOW);
 
             _delay_ms(1000);
             

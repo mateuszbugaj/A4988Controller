@@ -8,6 +8,7 @@ A4988_LIBRARY_INC_DIR := $(A4988_LIBRARY_DIR)inc/
 A4988_LIBRARY_SRC := $(wildcard $(A4988_LIBRARY_OBJ_DIR)*.c)
 A4988_LIBRARY_OBJ := $(A4988_LIBRARY_SRC:.c=.o)
 A4988_LIBRARY_AR := ar -rcs
+HAL_INC_DIR = lib/HALibrary/inc
 
 # default rule to build .a library
 all: $(A4988_LIBRARY_NAME).a
@@ -16,7 +17,7 @@ $(A4988_LIBRARY_NAME).a: $(A4988_LIBRARY_OBJ)
 	$(A4988_LIBRARY_AR) $@ $^
 
 %.o: %.c
-	$(CC) $(CFLAGS) -I$(A4988_LIBRARY_INC_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) -I$(A4988_LIBRARY_INC_DIR) -I$(HAL_INC_DIR) -c $< -o $@
 
 clean:
 	rm -f $(A4988_LIBRARY_NAME).a $(A4988_LIBRARY_OBJ)

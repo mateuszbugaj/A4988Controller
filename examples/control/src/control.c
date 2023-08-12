@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <avr/power.h>
 
-#include "gpio.h"
+#include "hal.h"
 #include "a4988.h"
 #include "parser.h"
 
@@ -15,7 +15,7 @@ A4988 motor1 = {
     .ms3 = { .port = &PORTB, .pin = PB7}
 };
 
-GPIOPin pinLED = { .port = &PORTB, .pin = PB0 };
+HALPin pinLED = { .port = &PORTB, .pin = PB0 };
 
 void handle_set_speed_command(uint16_t speed) {
     a4988_set_speed(&motor1, speed);
@@ -72,7 +72,7 @@ int main(void) {
     usart_init();
     parser_init(command_handlers, sizeof(command_handlers)/sizeof(command_handlers[0]));
 
-    gpio_pin_direction(pinLED, OUTPUT);
+    hal_pin_direction(pinLED, OUTPUT);
     usart_print("Start\n\r");
 	handle_help_command();
 
@@ -81,9 +81,9 @@ int main(void) {
     a4988_set_microstepping(&motor1, 4);
     while (1) {
         if(a4988_is_moving(&motor1)){
-            gpio_pin_write(pinLED, HIGH);
+            hal_pin_write(pinLED, HIGH);
         } else {
-            gpio_pin_write(pinLED, LOW);
+            hal_pin_write(pinLED, LOW);
         }
     }
 
